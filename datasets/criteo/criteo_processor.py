@@ -31,10 +31,10 @@ class CriteoDataProcessor:
         self.datafile = datafile
         self.output_file = output_file
         lstr = datafile.split("/")
-        self.d_path = "/".join(lstr[0:-1]) + "/"
+        self.d_path = "/".join(lstr[:-1]) + "/"
         self.d_file = lstr[-1].split(".")[0]
-        self.npzfile = self.d_path + (self.d_file + "_day")
-        self.trafile = self.d_path + (self.d_file + "_fea")
+        self.npzfile = f"{self.d_path}{self.d_file}_day"
+        self.trafile = f"{self.d_path}{self.d_file}_fea"
         self.total_file = self.d_path + self.d_file + "_day_count.npz"
 
         self.dataset_multiprocessing = dataset_multiprocessing
@@ -117,23 +117,23 @@ class CriteoDataProcessor:
                     filename_s,
                     X_int=X_int[0:i, :],
                     X_cat_t=np.transpose(X_cat[0:i, :]),
-                    y=y[0:i],
+                    y=y[:i],
                 )
+
                 print("\nSaved " + npzfile + "_{0}.npz!".format(split))
 
-        if dataset_multiprocessing:
-            resultDay[split] = i
-            convertDictsDay[split] = convertDicts_day
-            return
-        else:
+        if not dataset_multiprocessing:
             return i
+        resultDay[split] = i
+        convertDictsDay[split] = convertDicts_day
+        return
 
     @staticmethod
     def _transform_line(line, rand_u, sub_sample_rate):
         line = line.split('\t')
         # set missing values to zero
         for j in range(len(line)):
-            if (line[j] == '') or (line[j] == '\n'):
+            if line[j] in ['', '\n']:
                 line[j] = '0'
         # sub-sample data by dropping zero targets, if needed
         target = np.int32(line[0])
@@ -188,9 +188,11 @@ class CriteoDataProcessor:
                 Process(
                     target=CriteoDataProcessor.processCriteoAdData,
                     name="processCriteoAdData:%i" % i,
-                    args=(self.npzfile, i, self.days, convertDicts)
-                ) for i in range(0, self.days)
+                    args=(self.npzfile, i, self.days, convertDicts),
+                )
+                for i in range(self.days)
             ]
+
             for process in processes:
                 process.start()
             for process in processes:
@@ -206,13 +208,13 @@ class CriteoDataProcessor:
         # split into days (simplifies code later on)
         file_id = 0
         boundary = total_per_file[file_id]
-        nf = open(self.npzfile + "_" + str(file_id), "w")
+        nf = open(f"{self.npzfile}_{file_id}", "w")
         with open(str(self.datafile)) as f:
             for j, line in enumerate(f):
                 if j == boundary:
                     nf.close()
                     file_id += 1
-                    nf = open(self.npzfile + "_" + str(file_id), "w")
+                    nf = open(f"{self.npzfile}_{file_id}", "w")
                     boundary += total_per_file[file_id]
                 nf.write(line)
         nf.close()
@@ -224,13 +226,12 @@ class CriteoDataProcessor:
             total_count = np.sum(total_per_file)
             print("Skipping counts per file (already exist)")
         else:
+            print(f"Reading data from path={self.datafile}")
             total_count = 0
-            total_per_file = []
-            print("Reading data from path=%s" % (self.datafile))
             with open(str(self.datafile)) as f:
                 for _ in f:
                     total_count += 1
-            total_per_file.append(total_count)
+            total_per_file = [total_count]
             # reset total per file due to split
             num_data_per_split, extras = divmod(total_count, self.days)
             total_per_file = [num_data_per_split] * self.days
@@ -246,27 +247,34 @@ class CriteoDataProcessor:
         if dataset_multiprocessing:
             resultDay = Manager().dict()
             convertDictsDay = Manager().dict()
-            processes = [Process(target=CriteoDataProcessor._process_one_file,
-                                 name="process_one_file:%i" % i,
-                                 args=(self.npzfile + "_{0}".format(i),
-                                       self.npzfile,
-                                       i,
-                                       total_per_file[i],
-                                       dataset_multiprocessing,
-                                       self.days
-                                       ),
-                                 kwargs={
-                                     "sub_sample_rate": self.sub_sample_rate,
-                                     "convertDictsDay": convertDictsDay,
-                                     "resultDay": resultDay
-                                 }) for i in range(0, self.days)]
+            processes = [
+                Process(
+                    target=CriteoDataProcessor._process_one_file,
+                    name="process_one_file:%i" % i,
+                    args=(
+                        self.npzfile + "_{0}".format(i),
+                        self.npzfile,
+                        i,
+                        total_per_file[i],
+                        dataset_multiprocessing,
+                        self.days,
+                    ),
+                    kwargs={
+                        "sub_sample_rate": self.sub_sample_rate,
+                        "convertDictsDay": convertDictsDay,
+                        "resultDay": resultDay,
+                    },
+                )
+                for i in range(self.days)
+            ]
+
             for process in processes:
                 process.start()
             for process in processes:
                 process.join()
             for day in range(self.days):
                 total_per_file[day] = resultDay[day]
-                print("Constructing convertDicts Split: {}".format(day))
+                print(f"Constructing convertDicts Split: {day}")
                 convertDicts_tmp = convertDictsDay[day]
                 for i in range(26):
                     for j in convertDicts_tmp[i]:
@@ -288,14 +296,14 @@ class CriteoDataProcessor:
         print("Divided into days/splits:\n", total_per_file)
         return convertDicts
 
-    def processCriteoAdData(npzfile, i, days, convertDicts):
-        filename_i = npzfile + "_{0}_processed.npz".format(i)
+    def processCriteoAdData(self, i, days, convertDicts):
+        filename_i = self + "_{0}_processed.npz".format(i)
 
         if os.path.exists(filename_i):
-            print("Using existing " + filename_i, end="\n")
+            print(f"Using existing {filename_i}", end="\n")
             return
-        print("Not existing " + filename_i)
-        with np.load(npzfile + "_{0}.npz".format(i)) as data:
+        print(f"Not existing {filename_i}")
+        with np.load(self + "_{0}.npz".format(i)) as data:
             # categorical features
             # Approach 2a: using pre-computed dictionaries
             X_cat_t = np.zeros(data["X_cat_t"].shape)
@@ -312,11 +320,13 @@ class CriteoDataProcessor:
                 X_int=X_int,
                 y=data["y"],
             )
-        print("Processed " + filename_i, end="\n")
+        print(f"Processed {filename_i}", end="\n")
 
     def concat_data(self, o_filename):
-        print("Concatenating multiple days into %s.npz file" %
-              str(self.d_path + o_filename))
+        print(
+            f"Concatenating multiple days into {str(self.d_path + o_filename)}.npz file"
+        )
+
 
         # load and concatenate data
         for i in range(self.days):
@@ -377,8 +387,10 @@ class CriteoDataProcessor:
 
         # pre-process data if needed
         # WARNNING: when memory mapping is used we get a collection of files
-        print("Reading pre-processed data=%s" %
-              (str(self.d_path + self.output_file + ".npz")))
+        print(
+            f'Reading pre-processed data={str(self.d_path + self.output_file + ".npz")}'
+        )
+
         file = str(self.d_path + self.output_file + ".npz")
 
         # get a number of samples per day
@@ -386,7 +398,7 @@ class CriteoDataProcessor:
         with np.load(total_file) as data:
             total_per_file = data["total_per_file"]
         # compute offsets per file
-        offset_per_file = np.array([0] + [x for x in total_per_file])
+        offset_per_file = np.array([0] + list(total_per_file))
         for i in range(self.days):
             offset_per_file[i + 1] += offset_per_file[i]
 

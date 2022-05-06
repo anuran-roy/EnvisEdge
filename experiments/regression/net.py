@@ -50,7 +50,7 @@ class Regression_Net(nn.Module):
     def forward(self, x):
         out = self.linear(x.reshape(-1, self.input_dim))
 
-        if 0.0 < self.loss_threshold and self.loss_threshold < 1.0:
+        if 0.0 < self.loss_threshold < 1.0:
             out = torch.clamp(out, min=self.loss_threshold,
                               max=(1.0 - self.loss_threshold))
         return out

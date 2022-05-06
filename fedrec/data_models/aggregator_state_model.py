@@ -49,10 +49,12 @@ class Neighbour(Serializable):
                 setattr(self, k, v)
 
     def serialize(self):
-        response_dict = {}
-        response_dict["worker_index"] = self.worker_index
-        response_dict["last_sync"] = self.last_sync
-        response_dict["model_state"] = serialize_attribute(self.model_state)
+        response_dict = {
+            "worker_index": self.worker_index,
+            "last_sync": self.last_sync,
+            "model_state": serialize_attribute(self.model_state),
+        }
+
         response_dict["sample_num"] = self.sample_num
         return self.append_type(response_dict)
 
@@ -96,11 +98,12 @@ class AggregatorState(ActorState):
 
     def serialize(self):
         # pack the arguments from the objects to response dict
-        response_dict = {}
-        response_dict["worker_index"] = self.worker_index
-        response_dict["round_idx"] = self.round_idx
-        response_dict["state_dict"] = serialize_attribute(
-            self.state_dict)
+        response_dict = {
+            "worker_index": self.worker_index,
+            "round_idx": self.round_idx,
+            "state_dict": serialize_attribute(self.state_dict),
+        }
+
         response_dict["storage"] = self.storage
         response_dict["in_neighbours"] = serialize_attribute(
             self.in_neighbours)

@@ -45,10 +45,7 @@ class JobResponseMessage(Message):
         Check if errors is None and returns response
         message status accordingly
         '''
-        if self.errors is None:
-            return True
-        else:
-            return False
+        return self.errors is None
 
     def serialize(self):
         """
@@ -62,12 +59,13 @@ class JobResponseMessage(Message):
             The serialized class object to be written
             to JSON or persisted into the file.
         """
-        response_dict = {}
-        response_dict["job_type"] = self.job_type
-        response_dict["senderid"] = self.senderid
-        response_dict["receiverid"] = self.receiverid
-        response_dict["results"] = serialize_attribute(
-            self.results)
+        response_dict = {
+            "job_type": self.job_type,
+            "senderid": self.senderid,
+            "receiverid": self.receiverid,
+            "results": serialize_attribute(self.results),
+        }
+
         return self.append_type(response_dict)
 
     @classmethod

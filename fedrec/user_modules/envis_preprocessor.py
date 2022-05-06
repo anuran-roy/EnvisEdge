@@ -28,7 +28,7 @@ class EnvisPreProcessor(Serializable):
         pass
 
     def datasets(self, *splits):
-        assert all([isinstance(split, str) for split in splits])
+        assert all(isinstance(split, str) for split in splits)
         return {
             split: self.dataset_processor.dataset(split)
             for split in splits
@@ -44,12 +44,13 @@ class EnvisPreProcessor(Serializable):
         )
 
     def serialize(self):
-        output = self.append_type({
-            "proc_name": self.type_name(),
-            "client_id": self.client_id,
-            "dataset_config": self.dataset_config
-        })
-        return output
+        return self.append_type(
+            {
+                "proc_name": self.type_name(),
+                "client_id": self.client_id,
+                "dataset_config": self.dataset_config,
+            }
+        )
 
     @classmethod
     def deserialize(cls, obj):

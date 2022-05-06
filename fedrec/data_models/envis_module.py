@@ -31,10 +31,7 @@ class EnvisModule(Serializable):
             return getattr(self.original_reference, __name)
         else:
             raise AttributeError(
-                "No attribute {} in {}".format(
-                    __name,
-                    self.get_name(self.class_reference)
-                )
+                f"No attribute {__name} in {self.get_name(self.class_reference)}"
             )
 
     @property
@@ -52,9 +49,12 @@ class EnvisModule(Serializable):
 
     def serialize(self):
         # TODO decide how to fill storage from config
-        response_dict = {}
-        response_dict["class_ref_name"] = serialize_attribute(
-            self.get_name(self.class_reference))
+        response_dict = {
+            "class_ref_name": serialize_attribute(
+                self.get_name(self.class_reference)
+            )
+        }
+
         response_dict["state"] = serialize_attribute(self.envis_state)
         return self.append_type(response_dict)
 

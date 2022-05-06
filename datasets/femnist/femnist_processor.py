@@ -30,7 +30,7 @@ class FemnistProcessor:
 
     def process_file(self, split) -> Tuple[str, pd.DataFrame]:
         print("preprocessing datasset...")
-        output_path = self.meta_data_dir+"/{}_processed.csv".format(split)
+        output_path = self.meta_data_dir + f"/{split}_processed.csv"
         if os.path.exists(output_path):
             return output_path, None
         df = pd.read_csv(self.meta_data_dir + f"/{split}.csv")

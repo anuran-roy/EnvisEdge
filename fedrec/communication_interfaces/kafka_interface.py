@@ -58,8 +58,7 @@ class Kafka(AbstractCommunicationManager):
         super().__init__(serialization)
 
         if producer:
-            self.producer_url = "{}:{}".format(
-                producer_url, producer_port)
+            self.producer_url = f"{producer_url}:{producer_port}"
             self.producer = KafkaProducer(
                 bootstrap_servers=[self.producer_url],
                 value_serializer=self.serialize
@@ -67,8 +66,7 @@ class Kafka(AbstractCommunicationManager):
             self.producer_topic = producer_topic
 
         if consumer:
-            self.consumer_url = "{}:{}".format(
-                consumer_url, consumer_port)
+            self.consumer_url = f"{consumer_url}:{consumer_port}"
             self.consumer = KafkaConsumer(
                 consumer_topic,
                 bootstrap_servers=[self.consumer_url],

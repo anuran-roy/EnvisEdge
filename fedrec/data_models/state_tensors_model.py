@@ -45,10 +45,7 @@ class StateTensors(EnvisTensors):
         path: str
             The path to the tensor.
         """
-        return "{}/{}{}.pt".format(
-            str(self.storage),
-            str(self.get_name()),
-            self.suffix)
+        return f"{str(self.storage)}/{str(self.get_name())}{self.suffix}.pt"
 
     @staticmethod
     def split_path(path):

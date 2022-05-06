@@ -70,7 +70,7 @@ class BaseActor(Reproducible, ABC):
         raise NotImplementedError
 
     @abstractclassmethod
-    def load_worker(cls, *args, **kwargs):
+    def load_worker(self, *args, **kwargs):
         raise NotImplementedError
 
     @property
@@ -159,5 +159,5 @@ class BaseActor(Reproducible, ABC):
         else:
             return argument
 
-    def run(func_name, *args, **kwargs):
+    def run(self, *args, **kwargs):
         pass

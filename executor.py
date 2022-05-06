@@ -23,9 +23,9 @@ class JobExecutor():
         """
         # Construct trainer and do training
         self.config = config
-        if not set(['experiments',
-                    'fedrec',
-                    'fl_strategies']).issubset(set(sys.modules.values())):
+        if not {'experiments', 'fedrec', 'fl_strategies'}.issubset(
+            set(sys.modules.values())
+        ):
             import datasets
             import experiments
             import fedrec

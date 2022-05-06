@@ -20,8 +20,8 @@ class DLRMTrainConfig:
     num_batches = attr.ib(default=-1)
 
     @num_batches.validator
-    def check_only_one_declaration(instance, _, value):
-        if instance.num_epochs > 0 & value > 0:
+    def check_only_one_declaration(self, _, value):
+        if self.num_epochs > 0 & value > 0:
             raise ValueError(
                 "only one out of num_epochs and num_batches must be declared!")
 

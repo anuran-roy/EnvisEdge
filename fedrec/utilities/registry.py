@@ -55,9 +55,9 @@ def load(kind, name):
 
     def decorator(obj):
         if name in registry:
-            raise LookupError('{} already present'.format(name, kind))
+            raise LookupError(f'{name} already present')
         registry[name] = obj
-        class_ref[obj.__module__ + "." + obj.__name__] = obj
+        class_ref[f"{obj.__module__}.{obj.__name__}"] = obj
         return obj
     return decorator
 
@@ -97,7 +97,7 @@ def lookup(kind, name):
         name = name['name']
 
     if kind not in LOOKUP_DICT:
-        raise KeyError('Nothing registered under "{}"'.format(kind))
+        raise KeyError(f'Nothing registered under "{kind}"')
     return LOOKUP_DICT[kind][name]
 
 
@@ -187,8 +187,7 @@ def instantiate(callable, config, unused_keys=(), **kwargs):
     for name, param in signature.parameters.items():
         if param.kind in (inspect.Parameter.POSITIONAL_ONLY,
                           inspect.Parameter.VAR_POSITIONAL):
-            raise ValueError('Unsupported kind for param {}: {}'.format(
-                name, param.kind))
+            raise ValueError(f'Unsupported kind for param {name}: {param.kind}')
 
     if any(param.kind == inspect.Parameter.VAR_KEYWORD
            for param in signature.parameters.values()):
@@ -203,8 +202,7 @@ def instantiate(callable, config, unused_keys=(), **kwargs):
                 missing[key] = merged[key]
             merged.pop(key)
     if missing:
-        print('WARNING {}: superfluous {}'.format(
-            callable, missing), file=sys.stderr)
+        print(f'WARNING {callable}: superfluous {missing}', file=sys.stderr)
     return callable(**merged)
 
 
@@ -215,13 +213,13 @@ class Registrable(object):
     
     @classmethod
     def type_name(cls):
-        return cls.__module__ + "." + cls.__name__
+        return f"{cls.__module__}.{cls.__name__}"
 
     @staticmethod
     def get_name(obj):
         if not callable(obj):
             obj = obj.__class__
-        return obj.__module__ + "." + obj.__name__
+        return f"{obj.__module__}.{obj.__name__}"
 
     @staticmethod
     def register_class_ref(class_ref, name=None):
@@ -236,5 +234,5 @@ class Registrable(object):
     @staticmethod
     def lookup_class_ref(class_name):
         if class_name not in LOOKUP_DICT["class_map"]:
-            raise KeyError('No class found for "{}"'.format(class_name))
+            raise KeyError(f'No class found for "{class_name}"')
         return LOOKUP_DICT["class_map"][class_name]

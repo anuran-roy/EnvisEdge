@@ -11,7 +11,7 @@ def create_serializer_hooks(class_ref):
     # TODO : refactor the code, make a single
     # function to call these methods.
     def type_name(cls):
-        return cls.__module__ + "." + cls.__name__
+        return f"{cls.__module__}.{cls.__name__}"
 
     def append_type(self, obj_dict):
         """Generates a dictionary from an object and
@@ -34,15 +34,15 @@ def create_serializer_hooks(class_ref):
 
     def serialize(self):
         # TODO decide how to fill storage from config
-        response_dict = {}
-        response_dict["class_ref_name"] = serialize_attribute(
-            self.__class__.type_name())
+        response_dict = {
+            "class_ref_name": serialize_attribute(self.__class__.type_name())
+        }
+
         response_dict["state"] = serialize_attribute(self.envis_state)
         return self.append_type(response_dict)
 
     def deserialize(cls, obj: Dict):
-        state = deserialize_attribute(obj["state"])
-        return state
+        return deserialize_attribute(obj["state"])
 
     setattr(class_ref, "serialize", serialize)
     setattr(class_ref, "deserialize", classmethod(deserialize))

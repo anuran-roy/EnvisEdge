@@ -66,7 +66,7 @@ class InferenceMaker:
         scores = []
         targets = []
         model.eval()
-        for i, testBatch in enumerate(test_loader):
+        for testBatch in test_loader:
             inputs, true_labels = testBatch
 
             # forward pass
