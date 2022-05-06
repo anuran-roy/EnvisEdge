@@ -26,8 +26,8 @@ class TrainConfig:
     num_batches = attr.ib(default=-1)
 
     @num_batches.validator
-    def check_only_one_declaration(instance, _, value):
-        if instance.num_epochs > 0 & value > 0:
+    def check_only_one_declaration(self, _, value):
+        if self.num_epochs > 0 & value > 0:
             raise ValueError(
                 "only one out of num_epochs and num_batches must be declared!")
 
@@ -203,10 +203,11 @@ class EnvisTrainer(EnvisBase):
         for metric_name, metric_function in metrics_dict.items():
             results[metric_name] = metric_function(targets, scores)
             logger.add_scalar(
-                eval_section + "/" + "mlperf-metrics/" + metric_name,
+                f"{eval_section}/mlperf-metrics/{metric_name}",
                 results[metric_name],
                 step,
             )
+
 
         if (best_auc_test is not None) and\
                 (results["roc_auc"] > best_auc_test):
@@ -284,18 +285,21 @@ class EnvisTrainer(EnvisBase):
                             self.train_config.num_eval_batches,
                             step=last_step)
 
-                    if self.train_config.eval_on_val:
-                        if self.eval_model(
-                                self.model,
-                                self.data_loaders['val'],
-                                'val',
-                                self.logger,
-                                self.train_config.num_eval_batches,
-                                best_acc_test=best_acc_test,
+                    if (
+                        self.train_config.eval_on_val
+                        and self.eval_model(
+                            self.model,
+                            self.data_loaders['val'],
+                            'val',
+                            self.logger,
+                            self.train_config.num_eval_batches,
+                            best_acc_test=best_acc_test,
                             best_auc_test=best_auc_test,
-                                step=last_step)[1]:
-                            self.saver.save(modeldir, last_step,
-                                            current_epoch, is_best=True)
+                            step=last_step,
+                        )[1]
+                    ):
+                        self.saver.save(modeldir, last_step,
+                                        current_epoch, is_best=True)
 
                 # Compute and apply gradient
                 with self.model_random:

@@ -21,11 +21,8 @@ def map_to_list(model_params):
 
 
 def mapping_processes_to_gpus(gpu_config, process_id, worker_number):
-    if gpu_config == None:
+    if gpu_config is None:
         device = torch.device("cpu")
-        logging.info(device)
-        # return gpu_util_map[process_id][1]
-        return device
     else:
         logging.info(gpu_config)
         gpu_util_map = {}
@@ -36,14 +33,18 @@ def mapping_processes_to_gpus(gpu_config, process_id, worker_number):
                     gpu_util_map[i] = (host, gpu_j)
                     i += 1
         logging.info("Process: %d" % (process_id))
-        logging.info("host: %s" % (gpu_util_map[process_id][0]))
-        logging.info("gethostname: %s" % (socket.gethostname()))
+        logging.info(f"host: {gpu_util_map[process_id][0]}")
+        logging.info(f"gethostname: {socket.gethostname()}")
         logging.info("gpu: %d" % (gpu_util_map[process_id][1]))
         assert i == worker_number
 
         device = torch.device(
-            "cuda:" + str(gpu_util_map[process_id][1])
-            if torch.cuda.is_available() else "cpu")
-        logging.info(device)
-        # return gpu_util_map[process_id][1]
-        return device
+            f"cuda:{str(gpu_util_map[process_id][1])}"
+            if torch.cuda.is_available()
+            else "cpu"
+        )
+
+
+    logging.info(device)
+    # return gpu_util_map[process_id][1]
+    return device

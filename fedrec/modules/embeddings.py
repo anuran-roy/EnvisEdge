@@ -52,10 +52,7 @@ def alpha_power_rule(n, alpha, d0=None, B=None):
         raise ValueError("Must specify either d0 or B")
     d = torch.ones(len(n)) * lamb * (n.type(torch.float) ** (-alpha))
     for i in range(len(d)):
-        if i == 0 and d0 is not None:
-            d[i] = d0
-        else:
-            d[i] = 1 if d[i] < 1 else d[i]
+        d[i] = d0 if i == 0 and d0 is not None else max(d[i], 1)
     return (torch.round(d).type(torch.long))
 
 
@@ -121,9 +118,10 @@ class PrEmbeddingBag(nn.Module):
             self.proj = nn.Identity()
         else:
             raise ValueError(
-                "Embedding dim " + str(embedding_dim) +
-                " > base dim " + str(base_dim)
+                (f"Embedding dim {str(embedding_dim)}" + " > base dim ")
+                + str(base_dim)
             )
+
 
         if init:
             with torch.no_grad():
@@ -283,7 +281,7 @@ class QREmbeddingBag(nn.Module):
         self.norm_type = norm_type
         self.scale_grad_by_freq = scale_grad_by_freq
 
-        if self.operation == 'add' or self.operation == 'mult':
+        if self.operation in ['add', 'mult']:
             assert self.embedding_dim[0] == self.embedding_dim[1], \
                 'Embedding dimensions do not match!'
 

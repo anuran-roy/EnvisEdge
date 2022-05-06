@@ -101,7 +101,6 @@ class Jobber:
             Creates message objects for job response message
         """
         self.comm_manager.send_message(job_result)
-        pass
 
     def stop(self, success=True) -> None:
         """

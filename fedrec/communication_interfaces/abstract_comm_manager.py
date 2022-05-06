@@ -42,8 +42,7 @@ class AbstractCommunicationManager(ABC):
         message: str
             The serialized message.
         """
-        out = str(serialize_attribute(obj)).encode('utf-8')
-        return out
+        return str(serialize_attribute(obj)).encode('utf-8')
 
     def deserialize(self, message):
         """

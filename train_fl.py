@@ -146,7 +146,7 @@ def main():
     comm, process_id, worker_number = FedML_init()
 
     # customize the process name
-    str_process_name = "FedAvg (distributed):" + str(process_id)
+    str_process_name = f"FedAvg (distributed):{str(process_id)}"
     setproctitle.setproctitle(str_process_name)
 
     # customize the log format

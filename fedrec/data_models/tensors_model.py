@@ -43,7 +43,7 @@ class EnvisTensors(Serializable):
         path: str
             The path to the tensor.
         """
-        return "{}/{}.pt".format(str(self.storage), str(self.get_name()))
+        return f"{str(self.storage)}/{str(self.get_name())}.pt"
 
     def get_torch_obj(self):
         return self.tensors

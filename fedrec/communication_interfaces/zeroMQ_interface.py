@@ -19,15 +19,13 @@ class ZeroMQ(AbstractCommunicationManager):
         self.context = Context()
 
         if subscriber:
-            self.subscriber_url = "{}://{}:{}".format(
-                protocol, subscriber_url, subscriber_port)
+            self.subscriber_url = f"{protocol}://{subscriber_url}:{subscriber_port}"
             self.subscriber = self.context.socket(zmq.SUB)
             self.subscriber.setsockopt(zmq.SUBSCRIBE, subscriber_topic)
             self.subscriber.connect(self.subscriber_url)
 
         if publisher:
-            self.publisher_url = "{}://{}:{}".format(
-                protocol, publisher_url, publisher_port)
+            self.publisher_url = f"{protocol}://{publisher_url}:{publisher_port}"
             self.publisher = self.context.socket(zmq.PUB)
             self.publisher.connect(self.publisher_url)
 

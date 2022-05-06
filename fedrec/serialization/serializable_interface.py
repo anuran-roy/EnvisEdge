@@ -5,10 +5,7 @@ PRIMITIVES_TYPES = (str, int, float, bool)
 
 
 def is_primitives(obj):
-    if obj is None:
-        return True
-    else:
-        return isinstance(obj, PRIMITIVES_TYPES)
+    return True if obj is None else isinstance(obj, PRIMITIVES_TYPES)
 
 
 class Serializable(Registrable, ABC):

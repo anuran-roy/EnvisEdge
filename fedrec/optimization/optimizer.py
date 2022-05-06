@@ -26,19 +26,19 @@ class RWSAdagrad(Optimizer):
                  weight_decay=0.0,
                  initial_accumulator_value=0.0,
                  eps=1e-10):
-        if not 0.0 <= lr:
-            raise ValueError("Invalid learning rate: {}".format(lr))
-        if not 0.0 <= lr_decay:
-            raise ValueError("Invalid lr_decay value: {}".format(lr_decay))
-        if not 0.0 <= weight_decay:
+        if lr < 0.0:
+            raise ValueError(f"Invalid learning rate: {lr}")
+        if lr_decay < 0.0:
+            raise ValueError(f"Invalid lr_decay value: {lr_decay}")
+        if weight_decay < 0.0:
+            raise ValueError(f"Invalid weight_decay value: {weight_decay}")
+        if initial_accumulator_value < 0.0:
             raise ValueError(
-                "Invalid weight_decay value: {}".format(weight_decay))
-        if not 0.0 <= initial_accumulator_value:
-            raise ValueError(
-                "Invalid initial_accumulator_value value: {}".format(
-                    initial_accumulator_value))
-        if not 0.0 <= eps:
-            raise ValueError("Invalid epsilon value: {}".format(eps))
+                f"Invalid initial_accumulator_value value: {initial_accumulator_value}"
+            )
+
+        if eps < 0.0:
+            raise ValueError(f"Invalid epsilon value: {eps}")
 
         self.defaults = dict(
             lr=lr,

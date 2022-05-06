@@ -41,7 +41,7 @@ class DLRM_Net(nn.Module):
     def create_emb(self, m, ln, emb_dict, weighted_pooling=None):
         emb_l = nn.ModuleList()
         v_W_l = []
-        for i in range(0, ln.size):
+        for i in range(ln.size):
             # construct embedding operator
 
             if ((emb_dict.get("custom", None) is not None)
@@ -170,10 +170,9 @@ class DLRM_Net(nn.Module):
         if self.ndevices > 1:
             self.emb_l, self.v_W_l = self.create_emb(
                 self.m_spa, self.ln_emb, self.emb_dict, self.weighted_pooling)
-        else:
-            if self.weighted_pooling == "fixed":
-                for k, w in enumerate(self.v_W_l):
-                    self.v_W_l[k] = w.cuda()
+        elif self.weighted_pooling == "fixed":
+            for k, w in enumerate(self.v_W_l):
+                self.v_W_l[k] = w.cuda()
 
     def sanity_check(self):
         # sanity check: feature sizes and mlp dimensions must match
@@ -197,14 +196,13 @@ class DLRM_Net(nn.Module):
                     + " does not match last dim of bottom mlp "
                     + str(self.ln_bot[-1])
                 )
-        else:
-            if self.m_spa != self.ln_bot[-1]:
-                sys.exit(
-                    "ERROR: arch-sparse-feature-size "
-                    + str(self.m_spa)
-                    + " does not match last dim of bottom mlp "
-                    + str(self.ln_bot[-1])
-                )
+        elif self.m_spa != self.ln_bot[-1]:
+            sys.exit(
+                "ERROR: arch-sparse-feature-size "
+                + str(self.m_spa)
+                + " does not match last dim of bottom mlp "
+                + str(self.ln_bot[-1])
+            )
 
     def apply_mlp(self, x, layers):
         return layers(x)
@@ -252,7 +250,7 @@ class DLRM_Net(nn.Module):
         z = self.interact_features(x, ly)
         out = self.apply_mlp(z, self.top_l)
         # clamp output if needed
-        if 0.0 < self.loss_threshold and self.loss_threshold < 1.0:
+        if 0.0 < self.loss_threshold < 1.0:
             out = torch.clamp(out, min=self.loss_threshold,
                               max=(1.0 - self.loss_threshold))
         return out

@@ -30,8 +30,7 @@ class LRPolicyScheduler(_LRScheduler):
                 self.num_warmup_steps
             lr = [base_lr * scale for base_lr in self.base_lrs]
             self.last_lr = lr
-        elif self.decay_start_step <= step_count and \
-                step_count < self.decay_end_step:
+        elif self.decay_start_step <= step_count < self.decay_end_step:
             # decay
             decayed_steps = step_count - self.decay_start_step
             scale = ((self.num_decay_steps - decayed_steps) /
@@ -40,11 +39,5 @@ class LRPolicyScheduler(_LRScheduler):
             lr = [max(min_lr, base_lr * scale) for base_lr in self.base_lrs]
             self.last_lr = lr
         else:
-            if self.num_decay_steps > 0:
-                # freeze at last, either because we're after decay
-                # or because we're between warmup and decay
-                lr = self.last_lr
-            else:
-                # do not adjust
-                lr = self.base_lrs
+            lr = self.last_lr if self.num_decay_steps > 0 else self.base_lrs
         return lr

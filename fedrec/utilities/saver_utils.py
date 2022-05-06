@@ -36,7 +36,7 @@ def load_checkpoint(model,
     if step is not None:
         path += '-{:08d}'.format(step)
     if os.path.exists(path):
-        print("Loading model from %s" % path)
+        print(f"Loading model from {path}")
         checkpoint = torch.load(path, map_location=map_location)
         model.load_state_dict(checkpoint['model'], strict=False)
         optimizer.load_state_dict(checkpoint['optimizer'])
@@ -46,7 +46,7 @@ def load_checkpoint(model,
 
 def load_and_map_checkpoint(model, model_dir, remap):
     path = os.path.join(model_dir, 'model_checkpoint')
-    print("Loading parameters %s from %s" % (remap.keys(), model_dir))
+    print(f"Loading parameters {remap.keys()} from {model_dir}")
     checkpoint = torch.load(path)
     new_state_dict = model.state_dict()
     for name, value in remap.items():
@@ -73,7 +73,7 @@ def save_checkpoint(model,
             for item in ignore:
                 if key.startswith(item):
                     state_dict.pop(key)
-    path_with_step = '{}-{}'.format(path_without_step, step_padded)
+    path_with_step = f'{path_without_step}-{step_padded}'
     torch.save({
         'model': state_dict,
         'optimizer': optimizer.state_dict(),

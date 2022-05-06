@@ -6,8 +6,7 @@ import torch
 
 def load_tensors(path):
     if os.path.isfile(path) == True:
-        tensors = torch.load(path)
-        return tensors
+        return torch.load(path)
     else:
         raise ValueError("Path does not exist.")
 
@@ -60,8 +59,9 @@ def dash_separated_ints(value):
             int(val)
         except ValueError:
             raise argparse.ArgumentTypeError(
-                "%s is not a valid dash separated list of ints" % value
+                f"{value} is not a valid dash separated list of ints"
             )
+
 
     return value
 
@@ -73,7 +73,8 @@ def dash_separated_floats(value):
             float(val)
         except ValueError:
             raise argparse.ArgumentTypeError(
-                "%s is not a valid dash separated list of floats" % value
+                f"{value} is not a valid dash separated list of floats"
             )
+
 
     return value
